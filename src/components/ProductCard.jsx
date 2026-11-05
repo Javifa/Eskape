@@ -9,7 +9,7 @@ export default function ProductCard({ product, onSelect }) {
   return (
     <article
       className={`menu-card ${isSoldOut ? 'menu-card--soldout' : ''}`}
-      onClick={() => onSelect(product)}
+      onClick={() => onSelect && onSelect(product)}
     >
       <div className="menu-card__media">
         <img
@@ -17,8 +17,8 @@ export default function ProductCard({ product, onSelect }) {
           alt={product.name}
           className="menu-card__img"
           loading="lazy"
-          width="240"
-          height="240"
+          width="320"
+          height="320"
         />
         {isSoldOut ? (
           <span className="menu-card__badge menu-card__badge--soldout">
@@ -33,7 +33,7 @@ export default function ProductCard({ product, onSelect }) {
 
       <div className="menu-card__body">
         <div className="menu-card__header">
-          <h4 className="menu-card__title">{product.name}</h4>
+          <h3 className="menu-card__title">{product.name}</h3>
           <span
             className="menu-card__price"
             aria-label={`Precio ${formatPrice(product.price)}`}
@@ -42,22 +42,26 @@ export default function ProductCard({ product, onSelect }) {
           </span>
         </div>
 
-        <p className="menu-card__desc">{product.description}</p>
+        {product.description && (
+          <p className="menu-card__desc">{product.description}</p>
+        )}
 
-        <div className="menu-card__footer">
-          <div className="menu-card__tags">
-            {isSoldOut && (
-              <span className="soldout-chip">Agotado temporalmente</span>
-            )}
+        {(isSoldOut ||
+          (product.dietary && product.dietary.length > 0) ||
+          (product.allergens && product.allergens.length > 0)) && (
+          <div className="menu-card__footer">
+            <div className="menu-card__tags" aria-label="Alérgenos y características">
+              {isSoldOut && (
+                <span className="soldout-chip">Agotado temporalmente</span>
+              )}
 
-            {product.dietary?.map((tag) => (
-              <span key={tag} className="dietary-chip">
-                {tag}
-              </span>
-            ))}
+              {product.dietary?.map((tag) => (
+                <span key={tag} className="dietary-chip">
+                  {tag}
+                </span>
+              ))}
 
-            {product.allergens.length > 0 ? (
-              product.allergens.map((algKey) => {
+              {product.allergens?.map((algKey) => {
                 const alg = allergensMap[algKey];
                 if (!alg) return null;
                 return (
@@ -66,30 +70,14 @@ export default function ProductCard({ product, onSelect }) {
                     className="allergen-pill"
                     title={`Contiene ${alg.name}: ${alg.description}`}
                   >
-                    <AllergenIcon type={algKey} size={13} />
+                    <AllergenIcon type={algKey} size={12} />
                     <span>{alg.name}</span>
                   </span>
                 );
-              })
-            ) : (
-              <span className="allergen-pill allergen-pill--free">
-                Sin alérgenos
-              </span>
-            )}
+              })}
+            </div>
           </div>
-
-          <button
-            type="button"
-            className="menu-card__info-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect(product);
-            }}
-            aria-label={`Ver detalles y alérgenos de ${product.name}`}
-          >
-            Detalles
-          </button>
-        </div>
+        )}
       </div>
     </article>
   );
